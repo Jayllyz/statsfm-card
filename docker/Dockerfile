@@ -2,6 +2,7 @@
 FROM composer:latest AS composer
 FROM php:8.3-apache
 
+# hadolint ignore=DL3008
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 	libfreetype6-dev \
