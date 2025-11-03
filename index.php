@@ -4,7 +4,8 @@ require 'vendor/autoload.php';
 require 'constants.php';
 
 use GuzzleHttp\Client;
-use Intervention\Image\ImageManagerStatic as Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 $client = new Client([
 	'headers' => [
@@ -15,6 +16,8 @@ $client = new Client([
 	],
 	'verify' => false,
 ]);
+
+$imageManager = new ImageManager(new Driver());
 
 $PARAMS = DEFAULT_PARAMS;
 $CACHE_KEY = '';
@@ -85,28 +88,20 @@ function addRect($x, $y, $width, $height, $color, $radius, $gradientStart, $grad
 function addImg($client, $url, $x, $y, $width, $height, $radius)
 {
 	try {
+		$imageManager = $GLOBALS['imageManager'];
 		$response = $client->get($url);
 		$image_data = (string) $response->getBody();
 
-		$img = Image::make($image_data);
+		$img = $imageManager->read($image_data);
 
 		$aspect_ratio = $img->width() / $img->height();
 		if ($aspect_ratio != 1) {
 			$smaller_side = min($img->width(), $img->height());
-
-			if ($img->width() < $img->height()) {
-				$img->resize($smaller_side, null, function ($constraint) {
-					$constraint->aspectRatio();
-				});
-			} else {
-				$img->resize(null, $smaller_side, function ($constraint) {
-					$constraint->aspectRatio();
-				});
-			}
-			$img->crop($smaller_side, $smaller_side);
+			// Use cover() method which combines cropping and resizing
+			$img->cover($smaller_side, $smaller_side);
 		}
 
-		$image_base64 = base64_encode($img->encode('png'));
+		$image_base64 = base64_encode($img->toPng());
 
 		if ($radius) {
 			$id = getRandomId();
@@ -115,10 +110,8 @@ function addImg($client, $url, $x, $y, $width, $height, $radius)
 		}
 
 		return '<image x="' . $x . '" y="' . $y . '" width="' . $width . '" height="' . $height . '" href="data:image/png;base64,' . $image_base64 . '" />';
-	} catch (\Intervention\Image\Exception\NotReadableException $e) {
-		echo 'Image Read Error: ', $e->getMessage();
 	} catch (\Exception $e) {
-		echo 'General Error: ', $e->getMessage();
+		echo 'Image Error: ', $e->getMessage();
 	}
 }
 

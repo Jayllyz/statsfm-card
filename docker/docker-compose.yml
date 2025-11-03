@@ -1,8 +1,6 @@
-version: "3.8"
-
 services:
     php:
-        build: 
+        build:
             context: ../
             dockerfile: docker/Dockerfile
         container_name: statsfm-php

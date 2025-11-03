@@ -1,6 +1,6 @@
 # hadolint ignore=DL3007
 FROM composer:latest AS composer
-FROM php:8.3-apache
+FROM php:8.4-apache
 
 # hadolint ignore=DL3008
 RUN apt-get update \
