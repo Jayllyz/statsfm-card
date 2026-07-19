@@ -1,5 +1,7 @@
 package statsfm
 
+import "github.com/Jayllyz/statsfm-card/internal/config"
+
 // TopResponse is the stats.fm "top items" API envelope.
 type TopResponse struct {
 	Items []Item `json:"items"`
@@ -34,22 +36,24 @@ type Item struct {
 // their own image.
 func (i Item) NameAndImage(itemType string) (name, image string) {
 	switch itemType {
-	case "artists":
+	case config.TypeArtists:
 		if i.Artist != nil {
 			return i.Artist.Name, i.Artist.Image
 		}
-	case "albums":
+	case config.TypeAlbums:
 		if i.Album != nil {
 			return i.Album.Name, i.Album.Image
 		}
-	case "tracks":
+	case config.TypeTracks:
 		if i.Track != nil {
 			image := i.Track.Image
 			if image == "" && len(i.Track.Albums) > 0 {
 				image = i.Track.Albums[0].Image
 			}
+
 			return i.Track.Name, image
 		}
 	}
+
 	return "", ""
 }

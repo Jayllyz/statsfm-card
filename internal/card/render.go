@@ -4,6 +4,7 @@ import (
 	"context"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/Jayllyz/statsfm-card/internal/config"
 	"github.com/Jayllyz/statsfm-card/internal/statsfm"
@@ -20,19 +21,14 @@ type ImageFetcher func(ctx context.Context, url string) (base64PNG string, err e
 // Items beyond params.Limit are ignored. Images that fail to fetch are
 // logged and skipped, leaving the name/stat text in place.
 func Render(ctx context.Context, params config.Params, items []statsfm.Item, fetch ImageFetcher, logger zerolog.Logger) string {
-	limit := params.Limit
-	if limit > len(items) {
-		limit = len(items)
-	}
+	limit := min(params.Limit, len(items))
 
 	startX := (params.Width - (imageSize*limit + params.Spacing*(limit-1))) / 2
 	startY := (params.Height - imageSize) / 2
 
-	content := Rect(0, 0, params.Width, params.Height, params.Rounded, params.GStart, params.GStop)
+	var body strings.Builder
 
-	for i := range limit {
-		item := items[i]
-
+	for i, item := range items[:limit] {
 		localYOffset := (i % 2) * params.YOffset
 		localStartY := startY - localYOffset
 		localStartX := startX + (imageSize+params.Spacing)*i
@@ -45,18 +41,21 @@ func Render(ctx context.Context, params config.Params, items []statsfm.Item, fet
 			imageURL = config.NotFoundImage
 		}
 
-		if base64PNG, err := fetch(ctx, imageURL); err != nil {
+		base64PNG, err := fetch(ctx, imageURL)
+		if err != nil {
 			logger.Warn().Err(err).Str("url", imageURL).Msg("card: fetch item image failed, skipping")
 		} else {
-			content += Img(base64PNG, localStartX, localStartY, imageSize, imageSize, params.IRounded)
+			body.WriteString(Img(base64PNG, localStartX, localStartY, imageSize, imageSize, params.IRounded))
 		}
 
-		content += Text(EscapeText(name), centerX, artistTextY, "white", 9, "normal", "middle")
+		body.WriteString(Text(EscapeText(name), centerX, artistTextY, "white", 9, "normal", "middle"))
 
 		if stat := statText(item, params.Display); stat != "" {
-			content += Text(EscapeText(stat), centerX, statTextY, "white", 9, "bold", "middle")
+			body.WriteString(Text(EscapeText(stat), centerX, statTextY, "white", 9, "bold", "middle"))
 		}
 	}
+
+	content := Rect(0, 0, params.Width, params.Height, params.Rounded, params.GStart, params.GStop) + body.String()
 
 	return Wrap(params.Width, params.Height, content)
 }
@@ -66,10 +65,10 @@ func Render(ctx context.Context, params config.Params, items []statsfm.Item, fet
 // the thousands separator).
 func statText(item statsfm.Item, display string) string {
 	switch {
-	case display == "hours" && item.PlayedMs != nil:
+	case display == config.DisplayHours && item.PlayedMs != nil:
 		hours := int64(math.Round(float64(*item.PlayedMs) / 1000 / 60 / 60))
 		return formatThousands(hours) + " h"
-	case display == "streams" && item.Streams != nil:
+	case display == config.DisplayStreams && item.Streams != nil:
 		return formatThousands(*item.Streams) + " s"
 	default:
 		return ""
@@ -87,10 +86,12 @@ func formatThousands(n int64) string {
 	}
 
 	var out []byte
+
 	for i, c := range []byte(s) {
 		if i > 0 && (len(s)-i)%3 == 0 {
 			out = append(out, ' ')
 		}
+
 		out = append(out, c)
 	}
 

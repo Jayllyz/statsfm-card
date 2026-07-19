@@ -19,18 +19,23 @@ func parseParams(q url.Values) config.Params {
 	if v := q.Get("username"); v != "" {
 		p.Username = v
 	}
+
 	if v := q.Get("range"); v != "" {
 		p.Range = v
 	}
+
 	if v := q.Get("type"); v != "" {
 		p.Type = v
 	}
+
 	if v := q.Get("display"); v != "" {
 		p.Display = v
 	}
+
 	if v := q.Get("g_start"); v != "" {
 		p.GStart = card.EscapeText(v)
 	}
+
 	if v := q.Get("g_stop"); v != "" {
 		p.GStop = card.EscapeText(v)
 	}

@@ -16,6 +16,7 @@ func fakeFetcher(fail bool) ImageFetcher {
 		if fail {
 			return "", errors.New("boom")
 		}
+
 		return "base64-for-" + url, nil
 	}
 }
@@ -90,15 +91,19 @@ func TestRenderBuildsExpectedItems(t *testing.T) {
 	if !strings.HasPrefix(got, "<svg") || !strings.HasSuffix(got, "</svg>") {
 		t.Fatalf("Render() not a well-formed svg: %q", got)
 	}
+
 	if !strings.Contains(got, "Muse") || !strings.Contains(got, "Radiohead") {
 		t.Errorf("Render() missing expected item names: %q", got)
 	}
+
 	if strings.Contains(got, "Should Be Ignored") {
 		t.Errorf("Render() included item beyond limit: %q", got)
 	}
+
 	if !strings.Contains(got, "base64-for-muse.png") {
 		t.Errorf("Render() missing fetched image data: %q", got)
 	}
+
 	if !strings.Contains(got, "1 h") {
 		t.Errorf("Render() missing formatted stat text: %q", got)
 	}
@@ -118,6 +123,7 @@ func TestRenderSkipsImageOnFetchError(t *testing.T) {
 	if strings.Contains(got, "<image") {
 		t.Errorf("Render() should skip <image> on fetch error: %q", got)
 	}
+
 	if !strings.Contains(got, "Muse") {
 		t.Errorf("Render() should still render item name: %q", got)
 	}
@@ -133,6 +139,7 @@ func TestRenderFallsBackToNotFoundImage(t *testing.T) {
 	}
 
 	var gotURL string
+
 	fetch := func(_ context.Context, url string) (string, error) {
 		gotURL = url
 		return "b64", nil

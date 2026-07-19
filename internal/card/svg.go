@@ -16,7 +16,7 @@ func EscapeText(s string) string {
 
 // Rect returns a <rect>, optionally filled with a top-to-bottom linear
 // gradient when both gradientStart and gradientStop are non-empty.
-func Rect(x, y, width, height int, radius int, gradientStart, gradientStop string) string {
+func Rect(x, y, width, height, radius int, gradientStart, gradientStop string) string {
 	if gradientStart == "" || gradientStop == "" {
 		return fmt.Sprintf(
 			`<rect x="%d" y="%d" width="%d" height="%d" rx="%d" ry="%d" />`,
@@ -80,5 +80,6 @@ func Wrap(width, height int, content string) string {
 func ErrorSVG(width, height, rounded int, gradientStart, gradientStop, message string) string {
 	content := Rect(0, 0, width, height, rounded, gradientStart, gradientStop)
 	content += Text(EscapeText(message), width/2, height/2, "white", 12, "bold", "middle")
+
 	return Wrap(width, height, content)
 }

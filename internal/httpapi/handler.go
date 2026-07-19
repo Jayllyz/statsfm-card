@@ -28,6 +28,7 @@ func New(stats *statsfm.Client, httpClient *http.Client, c *cache.LRU, logger ze
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
+
 	w.Header().Set("Content-Type", "image/svg+xml")
 
 	params := parseParams(r.URL.Query())
@@ -42,6 +43,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if svg, ok := h.cache.Get(cacheKey); ok {
 		writeSVG(w, svg)
 		logger.Info().Bool("cache_hit", true).Dur("duration", time.Since(start)).Msg("served card")
+
 		return
 	}
 
@@ -49,8 +51,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.Error().Err(err).Msg("stats.fm request failed")
 		writeSVG(w, []byte(card.ErrorSVG(params.Width, params.Height, params.Rounded, params.GStart, params.GStop, "[500] Error fetching data from API")))
+
 		return
 	}
+
 	if len(top.Items) == 0 {
 		writeSVG(w, []byte(card.ErrorSVG(params.Width, params.Height, params.Rounded, params.GStart, params.GStop, "[204] No data found")))
 		return
@@ -75,5 +79,5 @@ func requestCacheKey(r *http.Request) string {
 }
 
 func writeSVG(w http.ResponseWriter, svg []byte) {
-	_, _ = w.Write(svg)
+	_, _ = w.Write(svg) //nolint:gosec // generated SVG bytes, not user-controlled HTML; gosec's taint check is a false positive here
 }

@@ -22,12 +22,15 @@ func newTestClient(t *testing.T, handler http.HandlerFunc) *Client {
 func TestClientTopItemsSuccess(t *testing.T) {
 	t.Parallel()
 
-	var gotPath string
-	var gotQuery url.Values
+	var (
+		gotPath  string
+		gotQuery url.Values
+	)
 
 	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
 		gotPath = r.URL.Path
 		gotQuery = r.URL.Query()
+
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = w.Write([]byte(`{"items":[{"artist":{"name":"Muse","image":"muse.png"}}]}`))
 	})
@@ -41,6 +44,7 @@ func TestClientTopItemsSuccess(t *testing.T) {
 	if gotPath != wantPath {
 		t.Errorf("request path = %q, want %q", gotPath, wantPath)
 	}
+
 	if gotQuery.Get("range") != "lifetime" || gotQuery.Get("limit") != "5" {
 		t.Errorf("request query = %v, want range=lifetime limit=5", gotQuery)
 	}
@@ -53,7 +57,7 @@ func TestClientTopItemsSuccess(t *testing.T) {
 func TestClientTopItemsNonOKStatus(t *testing.T) {
 	t.Parallel()
 
-	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
@@ -66,7 +70,7 @@ func TestClientTopItemsNonOKStatus(t *testing.T) {
 func TestClientTopItemsInvalidJSON(t *testing.T) {
 	t.Parallel()
 
-	client := newTestClient(t, func(w http.ResponseWriter, r *http.Request) {
+	client := newTestClient(t, func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("not json"))
 	})
 

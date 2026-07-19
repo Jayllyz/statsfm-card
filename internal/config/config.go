@@ -11,6 +11,18 @@ const (
 	NotFoundImage = "https://upload.wikimedia.org/wikipedia/commons/4/49/A_black_image.jpg"
 	// StatsfmBaseURL is the stats.fm API root used to fetch top items.
 	StatsfmBaseURL = "https://beta-api.stats.fm/api/v1"
+
+	// TypeArtists is the "type" query param value for top artists.
+	TypeArtists = "artists"
+	// TypeTracks is the "type" query param value for top tracks.
+	TypeTracks = "tracks"
+	// TypeAlbums is the "type" query param value for top albums.
+	TypeAlbums = "albums"
+
+	// DisplayHours is the "display" query param value for hours-played stats.
+	DisplayHours = "hours"
+	// DisplayStreams is the "display" query param value for stream-count stats.
+	DisplayStreams = "streams"
 )
 
 // Params holds the card's query-string driven configuration, with
@@ -36,8 +48,8 @@ func Default() Params {
 	return Params{
 		Username: "",
 		Range:    "lifetime",
-		Type:     "artists",
-		Display:  "hours",
+		Type:     TypeArtists,
+		Display:  DisplayHours,
 		Limit:    5,
 		Width:    580,
 		Height:   180,

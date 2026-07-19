@@ -36,9 +36,11 @@ func TestParseParamsOverrides(t *testing.T) {
 	if got.Username != "sheldon_cooper" || got.Type != "tracks" || got.Range != "weeks" || got.Display != "streams" {
 		t.Errorf("parseParams() string overrides not applied: %+v", got)
 	}
+
 	if got.Limit != 3 || got.Width != 800 {
 		t.Errorf("parseParams() int overrides not applied: %+v", got)
 	}
+
 	if got.GStart != "FF0000" {
 		t.Errorf("parseParams() GStart = %q, want %q", got.GStart, "FF0000")
 	}

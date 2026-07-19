@@ -15,7 +15,7 @@ import (
 func newTestHandler(t *testing.T, statsBody string, statsStatus int, imgHandler http.HandlerFunc) (*Handler, *httptest.Server, *httptest.Server) {
 	t.Helper()
 
-	statsSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	statsSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(statsStatus)
 		_, _ = w.Write([]byte(statsBody))
 	}))
@@ -38,16 +38,18 @@ func TestHandlerNoDataFound(t *testing.T) {
 
 	h, _, _ := newTestHandler(t, `{"items":[]}`, http.StatusOK, nil)
 
-	req := httptest.NewRequest(http.MethodGet, "/?username=nobody", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/?username=nobody", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (errors render as SVG, not HTTP errors)", rec.Code)
 	}
+
 	if !strings.Contains(rec.Body.String(), "No data found") {
 		t.Errorf("body = %q, want error message", rec.Body.String())
 	}
+
 	if ct := rec.Header().Get("Content-Type"); ct != "image/svg+xml" {
 		t.Errorf("Content-Type = %q, want image/svg+xml", ct)
 	}
@@ -58,7 +60,7 @@ func TestHandlerAPIError(t *testing.T) {
 
 	h, _, _ := newTestHandler(t, `{}`, http.StatusInternalServerError, nil)
 
-	req := httptest.NewRequest(http.MethodGet, "/?username=nobody", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/?username=nobody", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
@@ -70,7 +72,7 @@ func TestHandlerAPIError(t *testing.T) {
 func TestHandlerSuccessAndCacheHit(t *testing.T) {
 	t.Parallel()
 
-	imgHandler := func(w http.ResponseWriter, r *http.Request) {
+	imgHandler := func(w http.ResponseWriter, _ *http.Request) {
 		// 1x1 PNG.
 		png := []byte{
 			0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
@@ -88,19 +90,20 @@ func TestHandlerSuccessAndCacheHit(t *testing.T) {
 	body := `{"items":[{"artist":{"name":"Muse","image":"` + imgSrv.URL + `/muse.png"}}]}`
 	h, _, _ := newTestHandler(t, body, http.StatusOK, nil)
 
-	req := httptest.NewRequest(http.MethodGet, "/?username=sheldon", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/?username=sheldon", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
 	if !strings.Contains(rec.Body.String(), "Muse") {
 		t.Fatalf("body = %q, want item name", rec.Body.String())
 	}
+
 	if !strings.Contains(rec.Body.String(), "<image") {
 		t.Errorf("body missing <image>: %q", rec.Body.String())
 	}
 
 	// Second request with the same URL should be served from cache.
-	req2 := httptest.NewRequest(http.MethodGet, "/?username=sheldon", nil)
+	req2 := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/?username=sheldon", nil)
 	rec2 := httptest.NewRecorder()
 	h.ServeHTTP(rec2, req2)
 

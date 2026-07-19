@@ -48,13 +48,14 @@ func (c *LRU) Get(key string) ([]byte, bool) {
 		return nil, false
 	}
 
-	e := el.Value.(*entry) //nolint:forcetypeassert // container/list.Element.Value is always *entry, set exclusively by this type
+	e := el.Value.(*entry) //nolint:forcetypeassert,errcheck // container/list.Element.Value is always *entry, set exclusively by this type
 	if c.now().Sub(e.storedAt) >= c.ttl {
 		c.removeElement(el)
 		return nil, false
 	}
 
 	c.ll.MoveToFront(el)
+
 	return e.value, true
 }
 
@@ -65,10 +66,11 @@ func (c *LRU) Set(key string, value []byte) {
 	defer c.mu.Unlock()
 
 	if el, ok := c.items[key]; ok {
-		e := el.Value.(*entry) //nolint:forcetypeassert // see Get
+		e := el.Value.(*entry) //nolint:forcetypeassert,errcheck // see Get
 		e.value = value
 		e.storedAt = c.now()
 		c.ll.MoveToFront(el)
+
 		return
 	}
 
@@ -98,6 +100,6 @@ func (c *LRU) removeOldest() {
 
 func (c *LRU) removeElement(el *list.Element) {
 	c.ll.Remove(el)
-	e := el.Value.(*entry) //nolint:forcetypeassert // see Get
+	e := el.Value.(*entry) //nolint:forcetypeassert,errcheck // see Get
 	delete(c.items, e.key)
 }

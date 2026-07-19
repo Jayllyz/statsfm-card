@@ -18,6 +18,7 @@ func encodePNG(t *testing.T, img image.Image) []byte {
 	if err := png.Encode(&buf, img); err != nil {
 		t.Fatalf("png.Encode() error = %v", err)
 	}
+
 	return buf.Bytes()
 }
 
@@ -28,6 +29,7 @@ func solidImage(w, h int, c color.Color) image.Image {
 			img.Set(x, y, c)
 		}
 	}
+
 	return img
 }
 
@@ -65,7 +67,7 @@ func TestFetchSquarePNGSuccess(t *testing.T) {
 	src := solidImage(40, 20, color.RGBA{R: 255, A: 255})
 	data := encodePNG(t, src)
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write(data)
 	}))
 	t.Cleanup(srv.Close)
@@ -74,6 +76,7 @@ func TestFetchSquarePNGSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatalf("FetchSquarePNG() error = %v", err)
 	}
+
 	if got == "" {
 		t.Fatal("FetchSquarePNG() returned empty string")
 	}
@@ -82,7 +85,7 @@ func TestFetchSquarePNGSuccess(t *testing.T) {
 func TestFetchSquarePNGNonOKStatus(t *testing.T) {
 	t.Parallel()
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 	}))
 	t.Cleanup(srv.Close)
@@ -96,7 +99,7 @@ func TestFetchSquarePNGNonOKStatus(t *testing.T) {
 func TestFetchSquarePNGInvalidImage(t *testing.T) {
 	t.Parallel()
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		_, _ = w.Write([]byte("not an image"))
 	}))
 	t.Cleanup(srv.Close)
