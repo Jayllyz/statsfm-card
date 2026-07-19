@@ -31,8 +31,7 @@ type Item struct {
 }
 
 // NameAndImage returns the display name and cover image for the item,
-// matching the PHP lookup: top[singular]['name'] and top[singular]['image']
-// falling back to top['track']['albums'][0]['image'] for tracks without
+// falling back to the track's first album image for tracks without
 // their own image.
 func (i Item) NameAndImage(itemType string) (name, image string) {
 	switch itemType {

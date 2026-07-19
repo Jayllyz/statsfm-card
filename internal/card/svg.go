@@ -6,9 +6,8 @@ import (
 	"strings"
 )
 
-// EscapeText mirrors the PHP validate_and_escape('string', ...) SVG text
-// path: replace '&' with a fullwidth lookalike (raw '&' breaks SVG XML),
-// then HTML-escape the rest.
+// EscapeText escapes SVG text: replace '&' with a fullwidth lookalike
+// (raw '&' breaks SVG XML), then HTML-escape the rest.
 func EscapeText(s string) string {
 	s = strings.ReplaceAll(s, "&", "＆")
 	return html.EscapeString(s)

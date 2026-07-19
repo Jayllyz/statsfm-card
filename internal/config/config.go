@@ -25,8 +25,7 @@ const (
 	DisplayStreams = "streams"
 )
 
-// Params holds the card's query-string driven configuration, with
-// defaults matching the original PHP DEFAULT_PARAMS.
+// Params holds the card's query-string driven configuration.
 type Params struct {
 	Username string
 	Range    string

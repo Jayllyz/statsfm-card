@@ -10,9 +10,9 @@ import (
 	"github.com/Jayllyz/statsfm-card/internal/config"
 )
 
-// parseParams overlays query values onto the default Params, matching
-// the PHP behavior of only overriding keys present in the request and
-// falling back to the default on invalid integers.
+// parseParams overlays query values onto the default Params, only
+// overriding keys present in the request and falling back to the
+// default on invalid integers.
 func parseParams(q url.Values) config.Params {
 	p := config.Default()
 
@@ -52,7 +52,7 @@ func parseParams(q url.Values) config.Params {
 }
 
 // intParam parses key from q, falling back to def if absent or not a
-// valid integer (matching PHP's validate_and_escape('int', ...)).
+// valid integer.
 func intParam(q url.Values, key string, def int) int {
 	v, ok := q[key]
 	if !ok || len(v) == 0 {

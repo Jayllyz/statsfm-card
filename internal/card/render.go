@@ -60,9 +60,8 @@ func Render(ctx context.Context, params config.Params, items []statsfm.Item, fet
 	return Wrap(params.Width, params.Height, content)
 }
 
-// statText formats the played-time or stream-count label for an item,
-// matching the PHP hours/streams display modes (rounded hours, space as
-// the thousands separator).
+// statText formats the played-time or stream-count label for an item
+// (rounded hours, space as the thousands separator).
 func statText(item statsfm.Item, display string) string {
 	switch {
 	case display == config.DisplayHours && item.PlayedMs != nil:
@@ -75,8 +74,7 @@ func statText(item statsfm.Item, display string) string {
 	}
 }
 
-// formatThousands renders n with a space as the thousands separator,
-// matching PHP's number_format($n, 0, '.', ' ').
+// formatThousands renders n with a space as the thousands separator.
 func formatThousands(n int64) string {
 	s := strconv.FormatInt(n, 10)
 
