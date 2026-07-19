@@ -5,9 +5,9 @@ Create **svg cards** to showcase your top Spotify artists, tracks, or albums on 
 
 <div style="text-align:center"><img src="https://card.elwan.ch/?username=elwan.mayencourt" /></div>
 
-Images are cached for 1 day to reduce load time by a significant amount.
+Images are cached in memory for 1 day to reduce load time by a significant amount.
 
-![PHP](https://img.shields.io/badge/php-%23777BB4.svg?style=for-the-badge&logo=php&logoColor=white)
+![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white)
 
 ## 🌐 Services
 
@@ -32,14 +32,20 @@ Depending if your **stats.fm** account is **free** or **premium**, you will have
 
 
 
-## 🏡 Host 
+## 🏡 Host
 
-Host the code on any server that **support php** and then install the package using **composer** : 
+Run with Docker Compose:
 ```sh
-composer install
+docker compose -f docker/docker-compose.yml up -d --build
 ```
 
-I recommand creating a cron job that run the **clean.php** script. This script remove all cached images if they are older than 7 days. This will avoid using to much space for nothing.
+Or build and run the binary directly:
+```sh
+go build -o server ./cmd/server
+LISTEN_ADDR=:8080 ./server
+```
+
+The card cache is an in-memory LRU (bounded size, 1 day TTL) — no cron job or persistent volume needed.
 
 ## 🚀 Use
 

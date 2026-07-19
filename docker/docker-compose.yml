@@ -1,14 +1,11 @@
 services:
-    php:
+    server:
         build:
             context: ../
             dockerfile: docker/Dockerfile
-        container_name: statsfm-php
+        container_name: statsfm-server
         restart: unless-stopped
+        environment:
+            LISTEN_ADDR: ":8080"
         ports:
-            - "2812:80"
-        volumes:
-            - cache:/var/www/html/cache
-
-volumes:
-    cache:
+            - "2812:8080"
