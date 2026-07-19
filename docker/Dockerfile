@@ -9,4 +9,6 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/server ./cmd/serve
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/server /server
 EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD ["/server", "healthcheck"]
 ENTRYPOINT ["/server"]
