@@ -36,7 +36,7 @@ jobs:
 
     - name: Set up QEMU
       id: qemu
-      uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3.6.0
+      uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
 
     - name: Set up Docker Buildx
       id: buildx
@@ -44,7 +44,7 @@ jobs:
 
     - name: Login to GHCR
       id: login_ghcr
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+      uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -52,7 +52,7 @@ jobs:
 
     - name: Docker meta
       id: docker_meta
-      uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
+      uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
       with:
         images: ghcr.io/${{ github.repository }}
         flavor: latest=auto
