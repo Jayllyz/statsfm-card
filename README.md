@@ -3,7 +3,7 @@
 Create **svg cards** to showcase your top Spotify artists, tracks, or albums on any website or README.
 
 
-<div style="text-align:center"><img src="https://card.elwan.ch/?username=elwan.mayencourt" /></div>
+<div style="text-align:center"><img src="https://card.elwan.ch/?username=jayllyz" /></div>
 
 Images are cached in memory for 1 day to reduce load time by a significant amount.
 
@@ -72,27 +72,27 @@ Customize your card further with additional parameters:
 
 ### Default
 
-<div style="text-align:center"><img src="https://card.elwan.ch/?username=elwan.mayencourt" /></div>
+<div style="text-align:center"><img src="https://card.elwan.ch/?username=jayllyz" /></div>
 
 ### Tracks, months, streams
 > type=tracks&range=months&display=streams
 
-<div style="text-align:center"><img src="https://card.elwan.ch/?username=elwan.mayencourt&type=tracks&range=months&display=streams" /></div>
+<div style="text-align:center"><img src="https://card.elwan.ch/?username=jayllyz&type=tracks&range=months&display=streams" /></div>
 
 ### Albums, spacing, no offset, 4 items
 > type=albums&spacing=50&y_offset=20&limit=4
 
-<div style="text-align:center"><img src="https://card.elwan.ch/?username=elwan.mayencourt&type=albums&spacing=50&y_offset=20&limit=4" /></div>
+<div style="text-align:center"><img src="https://card.elwan.ch/?username=jayllyz&type=albums&spacing=50&y_offset=20&limit=4" /></div>
 
 ### Weeks, 4 items, 400x140 
 > type=artists&range=weeks&limit=4&width=400&height=140
 
-<div style="text-align:center"><img src="https://card.elwan.ch/?username=elwan.mayencourt&type=artists&range=weeks&limit=4&width=400&height=140" /></div>
+<div style="text-align:center"><img src="https://card.elwan.ch/?username=jayllyz&type=artists&range=weeks&limit=4&width=400&height=140" /></div>
 
 ### Gradient, rounded 
 > type=artists&rounded=40&i_rounded=100&g_start=36E7FF&g_stop=3F5DFF
 
-<div style="text-align:center"><img src="https://card.elwan.ch/?username=elwan.mayencourt&type=artists&rounded=40&i_rounded=100&g_start=36E7FF&g_stop=3F5DFF" /></div>
+<div style="text-align:center"><img src="https://card.elwan.ch/?username=jayllyz&type=artists&rounded=40&i_rounded=100&g_start=36E7FF&g_stop=3F5DFF" /></div>
 
 ## 🤝Contributing
 

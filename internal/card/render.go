@@ -14,12 +14,26 @@ import (
 // imageSize is the fixed square size, in pixels, of each item's cover art.
 const imageSize = 80
 
+// labelColor and labelSize style every text label on the card (item names,
+// stats, and the total-time footer).
+const (
+	labelColor = "white"
+	labelSize  = 9
+)
+
 // ImageFetcher fetches and encodes the image at url, returning a base64 PNG.
 type ImageFetcher func(ctx context.Context, url string) (base64PNG string, err error)
 
+// label returns a card text element styled with labelColor/labelSize,
+// center-anchored at x,y with the given font weight.
+func label(text string, x, y int, weight string) string {
+	return Text(EscapeText(text), x, y, labelColor, labelSize, weight, "middle")
+}
+
 // Render composes items into the full SVG card described by params.
 // Items beyond params.Limit are ignored. Images that fail to fetch are
-// logged and skipped, leaving the name/stat text in place.
+// logged and skipped, leaving the name/stat text in place. When
+// params.TotalMs is set, a total-time footer is added at the bottom.
 func Render(ctx context.Context, params config.Params, items []statsfm.Item, fetch ImageFetcher, logger zerolog.Logger) string {
 	limit := min(params.Limit, len(items))
 
@@ -48,16 +62,28 @@ func Render(ctx context.Context, params config.Params, items []statsfm.Item, fet
 			body.WriteString(Img(base64PNG, localStartX, localStartY, imageSize, imageSize, params.IRounded))
 		}
 
-		body.WriteString(Text(EscapeText(name), centerX, artistTextY, "white", 9, "normal", "middle"))
+		body.WriteString(label(name, centerX, artistTextY, "normal"))
 
 		if stat := statText(item, params.Display); stat != "" {
-			body.WriteString(Text(EscapeText(stat), centerX, statTextY, "white", 9, "bold", "middle"))
+			body.WriteString(label(stat, centerX, statTextY, "bold"))
 		}
 	}
 
 	content := Rect(0, 0, params.Width, params.Height, params.Rounded, params.GStart, params.GStop) + body.String()
 
+	if params.TotalMs != nil {
+		content += label("Total "+formatDuration(*params.TotalMs), params.Width/2, params.Height-8, "normal")
+	}
+
 	return Wrap(params.Width, params.Height, content)
+}
+
+// formatDuration renders a millisecond duration as a whole-hours label
+// (space thousands separator), matching the "h"-suffixed style used for
+// per-item stats.
+func formatDuration(ms int64) string {
+	hours := int64(math.Round(float64(ms) / 1000 / 60 / 60))
+	return formatThousands(hours) + " h"
 }
 
 // statText formats the played-time or stream-count label for an item
@@ -65,8 +91,7 @@ func Render(ctx context.Context, params config.Params, items []statsfm.Item, fet
 func statText(item statsfm.Item, display string) string {
 	switch {
 	case display == config.DisplayHours && item.PlayedMs != nil:
-		hours := int64(math.Round(float64(*item.PlayedMs) / 1000 / 60 / 60))
-		return formatThousands(hours) + " h"
+		return formatDuration(*item.PlayedMs)
 	case display == config.DisplayStreams && item.Streams != nil:
 		return formatThousands(*item.Streams) + " s"
 	default:

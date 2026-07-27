@@ -7,6 +7,18 @@ type TopResponse struct {
 	Items []Item `json:"items"`
 }
 
+// StreamStats is the stats.fm "streams/stats" API envelope, carrying the
+// user's aggregate listening totals for the requested range.
+type StreamStats struct {
+	Items StreamStatsItems `json:"items"`
+}
+
+// StreamStatsItems holds the aggregate totals within a StreamStats response.
+type StreamStatsItems struct {
+	DurationMs int64 `json:"durationMs"`
+	Count      int64 `json:"count"`
+}
+
 // Entity is a named, imaged stats.fm object (artist or album).
 type Entity struct {
 	Name  string `json:"name"`

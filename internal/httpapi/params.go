@@ -40,6 +40,8 @@ func parseParams(q url.Values) config.Params {
 		p.GStop = card.EscapeText(v)
 	}
 
+	p.Total = boolParam(q, "total", p.Total)
+
 	p.Limit = intParam(q, "limit", p.Limit)
 	p.Width = intParam(q, "width", p.Width)
 	p.Height = intParam(q, "height", p.Height)
@@ -65,4 +67,15 @@ func intParam(q url.Values, key string, def int) int {
 	}
 
 	return n
+}
+
+// boolParam parses key from q as "1" or "true", falling back to def if
+// absent.
+func boolParam(q url.Values, key string, def bool) bool {
+	v, ok := q[key]
+	if !ok || len(v) == 0 {
+		return def
+	}
+
+	return v[0] == "1" || v[0] == "true"
 }

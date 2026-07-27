@@ -40,6 +40,13 @@ type Params struct {
 	IRounded int
 	GStart   string
 	GStop    string
+	// Total is the "total" query param: whether the total listening-time
+	// footer was requested.
+	Total bool
+	// TotalMs is the resolved total listening time in milliseconds, set by
+	// the handler after fetching stats.fm stream stats. Nil when Total is
+	// false or the fetch failed.
+	TotalMs *int64
 }
 
 // Default returns the baseline Params before query-string overrides are applied.
@@ -58,5 +65,6 @@ func Default() Params {
 		IRounded: 4,
 		GStart:   "0D1117",
 		GStop:    "000000",
+		Total:    false,
 	}
 }

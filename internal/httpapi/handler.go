@@ -11,6 +11,7 @@ import (
 	"github.com/Jayllyz/statsfm-card/internal/card"
 	"github.com/Jayllyz/statsfm-card/internal/statsfm"
 	"github.com/rs/zerolog"
+	"golang.org/x/sync/errgroup"
 )
 
 // Handler serves SVG top-items cards over HTTP.
@@ -47,8 +48,33 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	top, err := h.stats.TopItems(r.Context(), params.Username, params.Type, params.Range, params.Limit)
-	if err != nil {
+	var top *statsfm.TopResponse
+
+	g, gctx := errgroup.WithContext(r.Context())
+
+	g.Go(func() error {
+		var err error
+
+		top, err = h.stats.TopItems(gctx, params.Username, params.Type, params.Range, params.Limit)
+
+		return err
+	})
+
+	if params.Total {
+		g.Go(func() error {
+			stats, err := h.stats.StreamStats(gctx, params.Username, params.Range)
+			if err != nil {
+				logger.Warn().Err(err).Msg("stats.fm stream stats request failed, omitting total")
+				return nil
+			}
+
+			params.TotalMs = &stats.Items.DurationMs
+
+			return nil
+		})
+	}
+
+	if err := g.Wait(); err != nil {
 		logger.Error().Err(err).Msg("stats.fm request failed")
 		writeSVG(w, []byte(card.ErrorSVG(params.Width, params.Height, params.Rounded, params.GStart, params.GStop, "[500] Error fetching data from API")))
 
