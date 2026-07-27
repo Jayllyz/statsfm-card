@@ -34,17 +34,42 @@ func New(baseURL string, logger zerolog.Logger) *Client {
 // TopItems fetches a user's top items of the given type (artists, tracks,
 // albums) for the given range, capped at limit results.
 func (c *Client) TopItems(ctx context.Context, username, itemType, rangeParam string, limit int) (*TopResponse, error) {
-	reqURL := fmt.Sprintf("%s/users/%s/top/%s", c.baseURL, url.PathEscape(username), url.PathEscape(itemType))
+	path := fmt.Sprintf("users/%s/top/%s", url.PathEscape(username), url.PathEscape(itemType))
+	query := url.Values{"range": {rangeParam}, "limit": {strconv.Itoa(limit)}}
+
+	var top TopResponse
+	if err := c.getJSON(ctx, path, query, &top); err != nil {
+		return nil, err
+	}
+
+	return &top, nil
+}
+
+// StreamStats fetches a user's aggregate listening totals (total played
+// time and stream count) for the given range.
+func (c *Client) StreamStats(ctx context.Context, username, rangeParam string) (*StreamStats, error) {
+	path := fmt.Sprintf("users/%s/streams/stats", url.PathEscape(username))
+	query := url.Values{"range": {rangeParam}}
+
+	var stats StreamStats
+	if err := c.getJSON(ctx, path, query, &stats); err != nil {
+		return nil, err
+	}
+
+	return &stats, nil
+}
+
+// getJSON issues a GET request to baseURL/path with query, decoding a
+// successful JSON response into out.
+func (c *Client) getJSON(ctx context.Context, path string, query url.Values, out any) error {
+	reqURL := fmt.Sprintf("%s/%s", c.baseURL, path)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
-		return nil, fmt.Errorf("statsfm: build request: %w", err)
+		return fmt.Errorf("statsfm: build request: %w", err)
 	}
 
-	q := req.URL.Query()
-	q.Set("range", rangeParam)
-	q.Set("limit", strconv.Itoa(limit))
-	req.URL.RawQuery = q.Encode()
+	req.URL.RawQuery = query.Encode()
 
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Accept", "*/*")
@@ -52,7 +77,7 @@ func (c *Client) TopItems(ctx context.Context, username, itemType, rangeParam st
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("statsfm: request failed: %w", err)
+		return fmt.Errorf("statsfm: request failed: %w", err)
 	}
 	defer func() {
 		if closeErr := resp.Body.Close(); closeErr != nil {
@@ -61,13 +86,12 @@ func (c *Client) TopItems(ctx context.Context, username, itemType, rangeParam st
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("statsfm: unexpected status %d for %s", resp.StatusCode, reqURL)
+		return fmt.Errorf("statsfm: unexpected status %d for %s", resp.StatusCode, reqURL)
 	}
 
-	var top TopResponse
-	if err := json.NewDecoder(resp.Body).Decode(&top); err != nil {
-		return nil, fmt.Errorf("statsfm: decode response: %w", err)
+	if err := json.NewDecoder(resp.Body).Decode(out); err != nil {
+		return fmt.Errorf("statsfm: decode response: %w", err)
 	}
 
-	return &top, nil
+	return nil
 }
