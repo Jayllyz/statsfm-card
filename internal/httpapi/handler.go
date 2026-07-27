@@ -54,7 +54,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	g.Go(func() error {
 		var err error
+
 		top, err = h.stats.TopItems(gctx, params.Username, params.Type, params.Range, params.Limit)
+
 		return err
 	})
 
