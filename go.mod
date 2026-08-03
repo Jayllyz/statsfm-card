@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/rs/zerolog v1.35.1
-	golang.org/x/sync v0.20.0
+	golang.org/x/sync v0.22.0
 	gotest.tools/gotestsum v1.13.0
 )
 
