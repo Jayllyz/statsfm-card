@@ -1,4 +1,5 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>Jayllyz/renovate-config"]
+  "extends": ["github>Jayllyz/renovate-config"],
+  "postUpdateOptions": ["gomodTidy"]
 }
