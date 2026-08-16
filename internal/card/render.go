@@ -72,7 +72,7 @@ func Render(ctx context.Context, params config.Params, items []statsfm.Item, fet
 	content := Rect(0, 0, params.Width, params.Height, params.Rounded, params.GStart, params.GStop) + body.String()
 
 	if params.TotalMs != nil {
-		content += label("Total "+formatDuration(*params.TotalMs), params.Width/2, params.Height-8, "normal")
+		content += label("Total "+formatDuration(*params.TotalMs), params.Width/2, params.Height-8, "bold")
 	}
 
 	return Wrap(params.Width, params.Height, content)
