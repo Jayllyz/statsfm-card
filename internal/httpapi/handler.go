@@ -41,6 +41,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Str("range", params.Range).
 		Logger()
 
+	if params.Username == "" {
+		logger.Warn().Msg("missing username")
+		writeSVG(w, []byte(card.ErrorSVG(params.Width, params.Height, params.Rounded, params.GStart, params.GStop, "[400] Missing username")))
+
+		return
+	}
+
 	if svg, ok := h.cache.Get(cacheKey); ok {
 		writeSVG(w, svg)
 		logger.Info().Bool("cache_hit", true).Dur("duration", time.Since(start)).Msg("served card")
