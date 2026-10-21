@@ -55,6 +55,35 @@ func TestHandlerNoDataFound(t *testing.T) {
 	}
 }
 
+func TestHandlerMissingUsername(t *testing.T) {
+	t.Parallel()
+
+	upstreamCalls := 0
+
+	statsSrv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		upstreamCalls++
+
+		w.WriteHeader(http.StatusNotFound)
+	}))
+	t.Cleanup(statsSrv.Close)
+
+	h := New(statsfm.New(statsSrv.URL, zerolog.Nop()), http.DefaultClient, cache.New(10, time.Hour), zerolog.Nop())
+
+	for _, target := range []string{"/", "/?username=", "/?username=%20", "/?username=+"} {
+		req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil)
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, req)
+
+		if !strings.Contains(rec.Body.String(), "<svg") || !strings.Contains(rec.Body.String(), "Missing username") {
+			t.Errorf("%s: body = %q, want missing username message", target, rec.Body.String())
+		}
+	}
+
+	if upstreamCalls != 0 {
+		t.Errorf("upstream calls = %d, want 0", upstreamCalls)
+	}
+}
+
 func TestHandlerAPIError(t *testing.T) {
 	t.Parallel()
 
