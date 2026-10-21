@@ -5,6 +5,7 @@ import (
 	"crypto/md5" //nolint:gosec // used only as a non-adversarial cache key, not for security
 	"encoding/hex"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Jayllyz/statsfm-card/internal/cache"
@@ -41,7 +42,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Str("range", params.Range).
 		Logger()
 
-	if params.Username == "" {
+	if strings.TrimSpace(params.Username) == "" {
 		logger.Warn().Msg("missing username")
 		writeSVG(w, []byte(card.ErrorSVG(params.Width, params.Height, params.Rounded, params.GStart, params.GStop, "[400] Missing username")))
 

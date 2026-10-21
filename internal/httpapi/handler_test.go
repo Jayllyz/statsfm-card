@@ -69,12 +69,12 @@ func TestHandlerMissingUsername(t *testing.T) {
 
 	h := New(statsfm.New(statsSrv.URL, zerolog.Nop()), http.DefaultClient, cache.New(10, time.Hour), zerolog.Nop())
 
-	for _, target := range []string{"/", "/?username="} {
+	for _, target := range []string{"/", "/?username=", "/?username=%20", "/?username=+"} {
 		req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, target, nil)
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, req)
 
-		if !strings.Contains(rec.Body.String(), "Missing username") {
+		if !strings.Contains(rec.Body.String(), "<svg") || !strings.Contains(rec.Body.String(), "Missing username") {
 			t.Errorf("%s: body = %q, want missing username message", target, rec.Body.String())
 		}
 	}
