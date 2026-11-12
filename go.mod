@@ -1,10 +1,10 @@
 module github.com/Jayllyz/statsfm-card
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/rs/zerolog v1.35.1
-	golang.org/x/sync v0.24.0
+	golang.org/x/sync v0.25.0
 	gotest.tools/gotestsum v1.13.0
 )
 
